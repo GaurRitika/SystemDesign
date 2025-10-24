@@ -1,14 +1,3 @@
-Perfect.
-We’ll begin from absolute zero — just like a real **university-level professor** would explain it in the first lecture of *“System Design 101.”*
-
----
-
-## 🎓 Lecture 1 — What Is System Design?
-
-Let’s imagine a simple story first.
-
----
-
 ### 📖 Storytime
 
 You build a small web app — say, a notes website where users can save their notes.
@@ -227,7 +216,7 @@ We’ll practice all of these one by one.
 
 ---
 
-## 🧩 Summary of Lecture 1
+## 🧩 Summary 
 
 | Concept           | Meaning                                                         |
 | ----------------- | --------------------------------------------------------------- |
@@ -239,19 +228,4 @@ We’ll practice all of these one by one.
 
 ---
 
-## 🏁 Your Learning Goal (Phase 1)
 
-By the end of this “course”, you should be able to:
-
-1. **Explain system design fundamentals clearly.**
-2. **Draw high-level architectures for small systems.**
-3. **Explain trade-offs (why and when to use each component).**
-4. **Design systems that scale from 100 → 100M users.**
-
----
-
-Now before we move to Lecture 2:
-Tell me — do you want me to teach **“Types of System Design + real-world examples”** next,
-or go directly into **“Core building blocks of a scalable system (Load Balancer, Cache, DB, etc.)”**?
-
-👉 Which one would you prefer as the next lecture?
