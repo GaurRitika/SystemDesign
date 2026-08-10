@@ -5,4 +5,646 @@ Terms included :
 3. CPSP
 4. VPA(Virtual Payment Address)
 
-https://app.eraser.io/workspace/qfyhUkcoGNLKhMRk8o6e?origin=share
+
+# UPI System Design - How UPI Works
+
+## Introduction
+
+UPI (Unified Payments Interface) has revolutionized digital payments in India by enabling instant bank-to-bank money transfers using just a Virtual Payment Address (VPA). Unlike traditional banking systems that require account numbers, IFSC codes, and branch details, UPI simplifies the entire payment process into a seamless experience.
+
+Whenever we use applications like **Google Pay, PhonePe, Paytm, BHIM**, etc., payments happen almost instantly. This document explains the complete high-level architecture behind UPI and how a payment is processed internally.
+
+---
+
+# Before UPI: Traditional Banking System
+
+Before UPI existed, all digital money transfers were performed directly between banks.
+
+For example:
+
+* ICICI Bank
+* HDFC Bank
+* SBI
+* Axis Bank
+* Yes Bank
+
+These banks are regulated by the **Reserve Bank of India (RBI)**. Banks cannot independently create their own payment protocols; all banking infrastructure follows RBI regulations.
+
+If a customer wanted to transfer money from an ICICI account to an HDFC account, they required:
+
+* Account Number
+* Bank Name
+* Branch
+* IFSC Code
+* Transfer Amount
+
+Every transaction required these banking details because they uniquely identified the destination account.
+
+Without these details, the transaction could not be processed successfully.
+
+---
+
+# Traditional Payment Mechanisms
+
+Before UPI, multiple payment protocols existed.
+
+## 1. IMPS (Immediate Payment Service)
+
+Used for:
+
+* Small payments
+* Instant transfers
+
+Examples:
+
+* ₹500
+* ₹1000
+* ₹5000
+
+Money reflected almost immediately.
+
+---
+
+## 2. NEFT (National Electronic Funds Transfer)
+
+Used for:
+
+* Larger transfers
+* Non-urgent payments
+
+Characteristics:
+
+* Batch processed
+* Usually took around 2–3 hours (historically)
+* Users often shared UTR numbers or screenshots after transferring money
+
+---
+
+## 3. RTGS (Real Time Gross Settlement)
+
+Used for:
+
+* High-value transactions
+
+Examples:
+
+* ₹5 Lakhs
+* ₹10 Lakhs
+* ₹20 Lakhs
+
+Money was transferred in real time.
+
+---
+
+# Problems with Traditional Banking
+
+Traditional transfers required:
+
+* Account Number
+* IFSC
+* Branch
+* Bank Name
+
+This made payments complicated.
+
+Users also had to:
+
+* Enter long banking details
+* Ensure no typing mistakes
+* Wait for payment settlement in many cases
+
+UPI solved all these problems.
+
+---
+
+# What is UPI?
+
+**UPI = Unified Payments Interface**
+
+The primary goal of UPI was:
+
+> Make digital payments as simple as sending a message.
+
+Instead of entering long banking details, users only need:
+
+* UPI ID (Virtual Payment Address)
+* Amount
+* UPI PIN
+
+The transfer becomes instant.
+
+---
+
+# NPCI - The Backbone of UPI
+
+The entire UPI ecosystem runs on **NPCI (National Payments Corporation of India).**
+
+NPCI is **not**:
+
+* A payment app
+* A bank
+* A payment gateway
+
+Instead, NPCI is the infrastructure that powers UPI.
+
+Think of NPCI as the central switching network connecting all banks.
+
+```
+               NPCI
+
+          Secure UPI Network
+                 |
+-----------------------------------------
+|        |         |         |          |
+ICICI   HDFC      SBI     Yes Bank   Axis
+```
+
+NPCI works only with trusted banks.
+
+Its APIs are **not publicly accessible.**
+
+No company or individual can directly communicate with NPCI.
+
+---
+
+# Trusted Network
+
+Only banks are allowed to communicate with NPCI.
+
+Examples:
+
+* ICICI
+* SBI
+* HDFC
+* Axis
+* Yes Bank
+
+Since this is a secure network:
+
+* Google Pay cannot directly call NPCI.
+* PhonePe cannot directly call NPCI.
+* Paytm cannot directly call NPCI.
+
+They require a partner bank.
+
+---
+
+# Payment Service Providers (PSPs)
+
+Applications such as:
+
+* Google Pay
+* PhonePe
+* Paytm
+
+are called **Payment Service Providers (PSPs).**
+
+Their responsibilities include:
+
+* Providing UI
+* QR scanning
+* User authentication screens
+* Payment initiation
+
+They do **not** settle money themselves.
+
+---
+
+# Why PSPs Need Partner Banks
+
+NPCI trusts only banks.
+
+Therefore:
+
+```
+PhonePe
+    |
+Partner Bank (Yes Bank)
+    |
+NPCI
+```
+
+Similarly,
+
+```
+Google Pay
+      |
+Partner Bank
+      |
+NPCI
+```
+
+Without a partner bank, these applications cannot participate in the UPI network.
+
+---
+
+# Virtual Payment Address (VPA)
+
+Instead of remembering:
+
+* Account Number
+* IFSC
+* Branch
+
+UPI introduced **Virtual Payment Address (VPA).**
+
+Example:
+
+```
+ritika@okhdfcbank
+
+john@ybl
+
+user@oksbi
+```
+
+A VPA consists of:
+
+```
+Username
+      +
+UPI Handle
+```
+
+Example:
+
+```
+ritika@okhdfcbank
+```
+
+Advantages:
+
+* Easy to remember
+* Easy to share
+* No IFSC required
+* No branch details required
+
+---
+
+# QR Codes
+
+A QR Code does **not** contain complete banking information.
+
+It mainly stores:
+
+* VPA
+* Merchant details (if applicable)
+
+Scanning a QR code simply fills the receiver's VPA automatically.
+
+It is essentially a convenient method of entering a Virtual Payment Address.
+
+---
+
+# Creating a Payment
+
+Suppose User A wants to send ₹1000 to User B.
+
+Inside the payment app, an intent is created.
+
+Example:
+
+```
+From:
+user1@yesbank
+
+To:
+piyush@okicici
+
+Amount:
+₹1000
+```
+
+This payment request is called a **Payment Intent**.
+
+---
+
+# Transaction Flow
+
+## Step 1
+
+User opens:
+
+* PhonePe
+* Google Pay
+* Paytm
+
+---
+
+## Step 2
+
+User:
+
+* scans QR
+
+or
+
+* enters VPA manually
+
+---
+
+## Step 3
+
+The application creates a payment intent.
+
+---
+
+## Step 4
+
+The PSP sends this intent to its partner bank.
+
+Example:
+
+```
+PhonePe
+
+↓
+
+Yes Bank
+```
+
+---
+
+## Step 5
+
+The partner bank forwards the request to NPCI.
+
+Since the request comes from a trusted bank, NPCI accepts it.
+
+---
+
+## Step 6
+
+NPCI verifies the sender.
+
+It asks:
+
+* Does this account exist?
+* Does sufficient balance exist?
+
+The sender's bank verifies the account.
+
+---
+
+## Step 7
+
+Authentication
+
+The user sees the UPI PIN screen.
+
+The user enters:
+
+```
+UPI PIN
+```
+
+The sender bank verifies it.
+
+---
+
+## Step 8
+
+Debit
+
+Once authentication succeeds,
+
+NPCI instructs the sender bank:
+
+```
+Debit ₹1000
+```
+
+The sender bank deducts the money.
+
+---
+
+## Step 9
+
+Credit
+
+NPCI identifies the receiver bank using the receiver's VPA.
+
+Example:
+
+```
+Receiver
+
+↓
+
+ICICI Bank
+```
+
+NPCI instructs:
+
+```
+Credit ₹1000
+```
+
+The receiver bank credits the money.
+
+---
+
+## Step 10
+
+Acknowledgement
+
+Both banks must acknowledge that:
+
+* Money has been debited
+* Money has been credited
+
+Only after receiving acknowledgements from both sides does NPCI mark the transaction as **Successful**.
+
+---
+
+# Transaction Rollback
+
+Sometimes:
+
+* Receiver bank server is busy
+* Server timeout occurs
+* No acknowledgement is received
+
+Example:
+
+Money gets debited from the sender.
+
+Receiver bank does not confirm the credit.
+
+NPCI detects the missing acknowledgement.
+
+Instead of marking the payment successful,
+
+NPCI initiates a rollback.
+
+```
+Sender
+
+↓
+
+Debit ₹1000
+
+↓
+
+No acknowledgement
+
+↓
+
+Rollback
+
+↓
+
+Credit ₹1000 back
+```
+
+This is why users often see:
+
+> Amount Debited
+
+followed by
+
+> Amount Refunded
+
+after a failed UPI transaction.
+
+---
+
+# Notifications
+
+After successful credit,
+
+the receiver bank informs its PSP.
+
+Example:
+
+```
+ICICI
+
+↓
+
+Google Pay
+
+↓
+
+Notification
+
+₹1000 Received
+```
+
+The app then shows the payment confirmation.
+
+---
+
+# Push Payments
+
+Push Payment means:
+
+The sender initiates a transfer.
+
+Example:
+
+```
+You send ₹500
+```
+
+The money is pushed to another account.
+
+---
+
+# Pull Payments
+
+Pull Payment means:
+
+The receiver requests money.
+
+Example:
+
+```
+Request ₹1000
+```
+
+The sender receives a payment request and approves it.
+
+NPCI also handles these request-money flows.
+
+---
+
+# Overall UPI Architecture
+
+```
+                 User
+
+                  │
+
+                  ▼
+
+        PhonePe / Google Pay
+
+                  │
+
+                  ▼
+
+          Partner Bank (PSP)
+
+                  │
+
+                  ▼
+
+          NPCI Secure Network
+
+        ┌─────────┴─────────┐
+
+        ▼                   ▼
+
+ Sender Bank         Receiver Bank
+
+        │                   │
+
+        ▼                   ▼
+
+Debit Money         Credit Money
+
+        │                   │
+
+        └─────────┬─────────┘
+
+                  ▼
+
+          Transaction Success
+
+                  ▼
+
+         Notification to Apps
+```
+
+---
+
+# Important Components
+
+| Component                        | Responsibility                         |
+| -------------------------------- | -------------------------------------- |
+| User                             | Initiates payment                      |
+| Payment App (Google Pay/PhonePe) | Provides UI and creates payment intent |
+| Partner Bank                     | Connects PSP with NPCI                 |
+| NPCI                             | Routes and validates transactions      |
+| Sender Bank                      | Debits money                           |
+| Receiver Bank                    | Credits money                          |
+| VPA                              | Identifies user without bank details   |
+| UPI PIN                          | Authenticates transaction              |
+
+---
+
+# Key Takeaways
+
+* UPI is built on top of India's banking infrastructure, not separate from it.
+* NPCI is the central backbone that routes all UPI transactions.
+* NPCI communicates only with trusted partner banks.
+* Payment apps like Google Pay, PhonePe, and Paytm cannot directly access NPCI.
+* Every PSP must partner with one or more banks to participate in the UPI ecosystem.
+* VPA replaces complex banking details such as Account Number and IFSC.
+* QR codes primarily encode the receiver's VPA, making payments easier.
+* Every UPI payment involves authentication through a UPI PIN before money is debited.
+* A transaction is considered successful only after both the debit and credit banks acknowledge completion.
+* If the receiver bank fails to acknowledge the transaction, NPCI initiates a rollback and refunds the sender.
+* UPI supports both **Push** (send money) and **Pull** (collect/request money) payment mechanisms.
+
